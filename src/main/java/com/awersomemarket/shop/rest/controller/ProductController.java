@@ -33,7 +33,7 @@ public class ProductController {
 //        product1.setImage("macbook-silver16.jpeg");
 //
 //        Product product2 = new Product();
-//        product2.setId(2L);
+//        product2.setId(2L);ФASD
 //        product2.setName("iPhone pro 12");
 //        product2.setPrice(new BigDecimal(79000));
 //        product2.setWeight(new BigDecimal(700));
@@ -46,6 +46,7 @@ public class ProductController {
 //        this.productList.setProductList(tmp);
 //    }
 
+    @CrossOrigin(origins = "*")
     @GetMapping(value = "products", produces = MediaType.APPLICATION_JSON_VALUE)
     public Products products() {
         return this.productsService.getProducts();

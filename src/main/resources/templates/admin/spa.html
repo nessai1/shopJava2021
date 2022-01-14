@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="admin/css/panel.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+
+</head>
+<body>
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="..">Admin Panel</a>
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <a class="nav-link" href="/admin/logout">Sign out</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="app.openOrder()">
+                            <i class="fa fa-truck icon_p"></i>
+                            Заказы
+                        </a>
+                    </li>
+                    <!-- template -->
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="app.openUsers()">
+                            <i class="fas fa-address-card icon_p"></i>
+                            Пользователи
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </nav>
+
+        <main id="app" role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+        </main>
+    </div>
+</div>
+
+
+<!-- Icons -->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
+    feather.replace()
+</script>
+
+<script src="admin/js/app.js"></script>
+<script>
+
+    class OrderItem
+    {
+        orderNode;
+
+        createCustomer(customer)
+        {
+            let customerNode = document.createElement('span');
+            customerNode.classList.add('orderCustomer');
+            customerNode.append(document.createTextNode(`Покупатель: ${customer}`));
+
+            return customerNode;
+        }
+
+        createTitle(orderId)
+        {
+            let titleNode = document.createElement('span');
+            titleNode.classList.add('orderTitle');
+            titleNode.append(document.createTextNode(`Заказ #${orderId}`));
+
+            return titleNode;
+        }
+
+        createProductItem(productInfo)
+        {
+            let productItemNode = document.createElement('li');
+            productItemNode.append(document.createTextNode(`- ${productInfo.name} x${productInfo.count}`));
+
+            return productItemNode;
+        }
+
+        createProductList(productList)
+        {
+            let productListNode = document.createElement('ul');
+            productListNode.classList.add('orderList');
+            productList.forEach(productItem => {
+                productListNode.append(this.createProductItem(productItem));
+            });
+
+            return productListNode;
+        }
+
+        constructor(orderData) {
+            this.orderNode = document.createElement('div');
+            this.orderNode.classList.add('orderItem');
+            this.orderNode.append(this.createTitle(orderData.id));
+            this.orderNode.append(this.createCustomer(orderData.customer));
+            this.orderNode.append(this.createProductList(orderData.productList));
+        }
+
+    }
+
+    class Orders
+    {
+        ordersNode;
+        ordersList = [];
+        constructor(orders) {
+            this.ordersNode = document.createElement('div');
+            this.ordersNode.classList.add('orderList');
+            orders.forEach(order => {
+                let orderObj = new OrderItem(order);
+                this.ordersNode.append(orderObj.orderNode);
+            });
+        }
+    }
+
+    class Users
+    {
+
+    }
+
+    class AdminSPA
+    {
+        appNode;
+        orders;
+        users;
+
+        constructor() {
+            this.appNode = document.querySelector("#app");
+            let ord = [
+                {
+                    id: 1,
+                    customer: 'Daniel',
+                    productList: [
+                        {name: 'macbook', count: 12},
+                        {name: 'iphone', count: 12},
+                    ],
+                },
+                {
+                    id: 2,
+                    customer: 'Daniel',
+                    productList: [
+                        {name: 'macbook', count: 12},
+                        {name: 'iphone', count: 12},
+                    ],
+                },
+            ]
+            this.orders = new Orders(ord);
+            this.users = new Users();
+
+            this.appNode.append(this.orders.ordersNode)
+        }
+
+        openUsers() {
+            this.orders.ordersNode.hidden = true;
+        }
+
+        openOrder() {
+            this.orders.ordersNode.hidden = false;
+        }
+    }
+
+
+    let app = new AdminSPA();
+
+</script>
+</body>
+</html>
