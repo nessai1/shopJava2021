@@ -13,7 +13,7 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "s_product")
-class ProductEntity {
+public class ProductEntity {
 
     @Setter(AccessLevel.NONE)
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;

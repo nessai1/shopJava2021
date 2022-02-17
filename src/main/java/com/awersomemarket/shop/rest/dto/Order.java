@@ -2,6 +2,8 @@ package com.awersomemarket.shop.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
+import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 

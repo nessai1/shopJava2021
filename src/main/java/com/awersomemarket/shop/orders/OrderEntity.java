@@ -16,6 +16,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Table(name = "s_order")
 public class OrderEntity {
+
     @Setter(AccessLevel.NONE)
     private @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
@@ -26,6 +27,10 @@ public class OrderEntity {
     @JoinColumn(nullable = false)
     private UserEntity user;
 
+    @Setter(AccessLevel.PROTECTED)
+    private OrderStatus status;
+
+    @Setter(AccessLevel.PROTECTED)
     private String address;
 
     @Override
