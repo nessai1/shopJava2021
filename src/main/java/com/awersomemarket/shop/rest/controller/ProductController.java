@@ -23,29 +23,6 @@ public class ProductController {
         this.productsService = productsService;
     }
 
-//    public ProductController() {
-//        Products productList = new Products();
-//        Product product1 = new Product();
-//        product1.setId(1L);
-//        product1.setName("MacBook Pro");
-//        product1.setPrice(new BigDecimal(344000));
-//        product1.setWeight(new BigDecimal(3600));
-//        product1.setImage("macbook-silver16.jpeg");
-//
-//        Product product2 = new Product();
-//        product2.setId(2L);ФASD
-//        product2.setName("iPhone pro 12");
-//        product2.setPrice(new BigDecimal(79000));
-//        product2.setWeight(new BigDecimal(700));
-//        product2.setImage("macbook-silver16.jpeg");
-//
-//        List<Product> tmp = new ArrayList<Product>();
-//        tmp.add(product1);
-//        tmp.add(product2);
-//
-//        this.productList.setProductList(tmp);
-//    }
-
     @CrossOrigin(origins = "*")
     @GetMapping(value = "products", produces = MediaType.APPLICATION_JSON_VALUE)
     public Products products() {

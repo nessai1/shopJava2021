@@ -360,7 +360,14 @@
                 this.productList.appendChild(productCard.getProductCard());
             }
             this.productCards[productCard.getProductId()] = productCard;
+        }
 
+        hideProductList() {
+            this.productList.style.display = 'none';
+        }
+
+        showProductList() {
+            this.productList.style.display = 'flex';
         }
     }
 
@@ -400,6 +407,30 @@
         applyForm() {
             let userData = this.getUserData();
             console.log('form data: ', userData, this.orderProductList);
+
+            let requestData = {
+                user: userData,
+                products: [
+                    {
+                        id: 1,
+                        count: 15,
+                    },
+                    {
+                        id: 2,
+                        count: 3
+                    }
+                ],
+            }
+
+            fetch('/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            }).then(response => response.json()).then(data => {
+                console.log(data);
+            })
         }
 
         createOrderPosition(name, count, img) {
@@ -445,6 +476,8 @@
         basket;
         order;
 
+        loader;
+
         allProducts;
 
         constructor() {
@@ -453,9 +486,19 @@
             this.basket.getBasket().addEventListener('click', this.openPopup.bind(this), false);
             this.order = new Order();
 
+            let loaderSpinner = createEl('div', 'loader__spinner');
+            let spinner = createEl('img', 'spinner');
+            spinner.src = '/spinner.svg';
+            loaderSpinner.appendChild(spinner);
+            this.loader = createEl('div', 'loader');
+            this.loader.appendChild(loaderSpinner);
+
             this.allProducts = [];
 
+            this.productList.hideProductList();
+
             document.querySelector('#content').appendChild(this.productList.getProductList());
+            document.querySelector('#content').appendChild(this.loader);
         }
 
 
@@ -498,6 +541,24 @@
             {
                 this.order.startOrder(this.allProducts.filter(product => product.count > 0));
             }
+        }
+
+        showLoader() {
+            this.loader.style.display = 'block';
+        }
+
+        hideLoader() {
+            this.loader.style.display = 'none';
+        }
+
+        hideProducts() {
+            this.showLoader();
+            this.productList.hideProductList();
+        }
+
+        showProducts() {
+            this.hideLoader();
+            this.productList.showProductList();
         }
     }
 

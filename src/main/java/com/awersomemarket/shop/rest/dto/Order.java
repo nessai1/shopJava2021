@@ -1,26 +1,35 @@
 package com.awersomemarket.shop.rest.dto;
 
+import com.awersomemarket.shop.rest.dto.position.Position;
+import com.awersomemarket.shop.rest.dto.position.Positions;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import java.util.List;
 
+@Data
+@Schema(description = "Order data")
+@Validated
 public class Order {
 
-    @NotNull
+    @Null
     @JsonProperty
-    @Schema(description = "id", required = true)
+    @Schema(description = "id", required = false)
     private Long id;
 
     @NotNull
-    @Schema(description = "Customer name", required = true)
-    @JsonProperty("customer")
-    private String customer;
+    @JsonProperty
+    @Schema(description = "Customer data", required = true)
+    private Customer user;
 
-//    @NotNull
-//    @Schema(description = "Customer name", required = true)
-//    @JsonProperty("customer")
-//    private String ;
+    @NotNull
+    @Schema(description = "List of product positions", required = true)
+    @JsonProperty("products")
+    private List<Position> positionList;
 }
