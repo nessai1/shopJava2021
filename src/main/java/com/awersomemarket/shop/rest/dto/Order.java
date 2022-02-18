@@ -25,6 +25,11 @@ public class Order {
 
     @NotNull
     @JsonProperty
+    @Schema(description = "Order address", required = true)
+    private String address;
+
+    @NotNull
+    @JsonProperty
     @Schema(description = "Customer data", required = true)
     private Customer user;
 

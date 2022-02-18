@@ -30,7 +30,6 @@ public class OrderController {
         System.out.println(12);
         Status st = new Status();
         st.setCode(StatusCode.OK);
-        Customer a = this.userService.getUserByPhone(order.getUser().getPhone());
 
         return st;
     }

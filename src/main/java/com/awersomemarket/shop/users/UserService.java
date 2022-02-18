@@ -4,5 +4,9 @@ import com.awersomemarket.shop.rest.dto.Customer;
 
 public interface UserService {
 
-    Customer getUserByPhone(String phone);
+    Customer findByPhone(String phone);
+
+    Customer createIfNotExits(Customer user);
+
+    void createUser(Customer user);
 }

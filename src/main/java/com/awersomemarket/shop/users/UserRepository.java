@@ -8,7 +8,7 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    List<UserEntity> findUserEntityByPhone(String phone);
-
     boolean existsByPhone(String phone);
+
+    UserEntity getByPhone(String phone);
 }

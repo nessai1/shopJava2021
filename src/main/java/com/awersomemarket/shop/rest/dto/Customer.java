@@ -21,7 +21,4 @@ public class Customer {
 
     @JsonProperty
     private String phone;
-
-    @JsonProperty
-    private String address;
 }
