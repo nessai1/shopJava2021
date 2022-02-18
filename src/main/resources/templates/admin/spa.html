@@ -41,6 +41,12 @@
                             Пользователи
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="app.openProducts()">
+                            <i class="fas fa-address-card icon_p"></i>
+                            Товары
+                        </a>
+                    </li>
                 </ul>
 
             </div>
@@ -61,120 +67,223 @@
 <script src="admin/js/app.js"></script>
 <script>
 
-    class OrderItem
+
+    function createEl(name, className, content = null) {
+        let el = document.createElement(name);
+        el.className = className;
+
+        if (content !== null)
+            el.innerHTML = content;
+
+        return el;
+    }
+
+    class Component
     {
-        orderNode;
+        content;
 
-        createCustomer(customer)
-        {
-            let customerNode = document.createElement('span');
-            customerNode.classList.add('orderCustomer');
-            customerNode.append(document.createTextNode(`Покупатель: ${customer}`));
-
-            return customerNode;
+        constructor() {
+            this.content = createEl('div');
+            this.hide();
         }
 
-        createTitle(orderId)
-        {
-            let titleNode = document.createElement('span');
-            titleNode.classList.add('orderTitle');
-            titleNode.append(document.createTextNode(`Заказ #${orderId}`));
-
-            return titleNode;
+        getContent() {
+            return this.content;
         }
 
-        createProductItem(productInfo)
-        {
-            let productItemNode = document.createElement('li');
-            productItemNode.append(document.createTextNode(`- ${productInfo.name} x${productInfo.count}`));
-
-            return productItemNode;
+        showContent() {
+            this.content.style.display = 'block';
         }
 
-        createProductList(productList)
-        {
-            let productListNode = document.createElement('ul');
-            productListNode.classList.add('orderList');
-            productList.forEach(productItem => {
-                productListNode.append(this.createProductItem(productItem));
-            });
-
-            return productListNode;
-        }
-
-        constructor(orderData) {
-            this.orderNode = document.createElement('div');
-            this.orderNode.classList.add('orderItem');
-            this.orderNode.append(this.createTitle(orderData.id));
-            this.orderNode.append(this.createCustomer(orderData.customer));
-            this.orderNode.append(this.createProductList(orderData.productList));
+        hide() {
+            this.content.style.display = 'none';
         }
 
     }
 
-    class Orders
+
+    /* --- ORDERS BLOCK --- */
+
+    class Orders extends Component
     {
-        ordersNode;
-        ordersList = [];
         constructor(orders) {
-            this.ordersNode = document.createElement('div');
-            this.ordersNode.classList.add('orderList');
-            orders.forEach(order => {
-                let orderObj = new OrderItem(order);
-                this.ordersNode.append(orderObj.orderNode);
-            });
+            super();
+            this.content.innerHTML = "orders";
         }
     }
 
-    class Users
-    {
+    /* --- USERS BLOCK --- */
 
+    class Users extends Component
+    {
+        constructor() {
+            super();
+            this.content.innerHTML = "users";
+        }
     }
+
+    /* --- PRODUCTS BLOCK --- */
+
+    class Products extends Component
+    {
+        products;
+        productCards = [];
+
+        constructor(pList = []) {
+            super();
+
+            this.products = pList;
+            pList.forEach(product => {
+                this.addProduct(product);
+            });
+        }
+
+        addProduct(product) {
+            let productCard = new ProductCard(product);
+            this.products.push(product);
+            this.content.appendChild(productCard.getCard());
+        }
+    }
+
+
+    class ProductCard {
+
+        product;
+        card;
+
+        constructor(product) {
+            this.product = product;
+            this.card = createEl('div', 'product-card');
+            this.card.id = 'product-card-' + this.product.id;
+
+            let photoBlock = this.createPhotoBlock(this.product.id, this.product.img);
+            let infoBlock = this.createIBlock(product);
+
+            this.card.appendChild(photoBlock);
+            this.card.appendChild(infoBlock);
+        }
+
+        getCard() {
+            return this.card;
+        }
+
+        createPhotoBlock(productId, photoSrc) {
+            let photoBlock = createEl('div', 'product-card-img-edit');
+
+            let imgBlock = createEl('img', 'product-card-img');
+            imgBlock.src = photoSrc;
+            imgBlock.id = 'product-card-' + productId + '-img';
+
+            let fileInput = createEl('input');
+            fileInput.type = 'file';
+            fileInput.id = 'product-card-img-input-' + productId;
+
+
+            let button = createEl('button', 'product-card-img-edit-button btn btn-primary btn-sm', 'Загрузить фото');
+            button.id = 'product-card-' + productId + '-img-button';
+            button.dataset.productId = productId;
+            button.dataset.action = 'product-img-upload';
+
+            photoBlock.appendChild(imgBlock);
+            photoBlock.appendChild(fileInput);
+            photoBlock.appendChild(button);
+
+            return photoBlock;
+        }
+
+        createIBlock(product) {
+            let infoBlock = createEl('div', 'product-card-info');
+            infoBlock.appendChild(this.createInfoInput('Название', product.name, 'name-' + product.id));
+            infoBlock.appendChild(this.createInfoInput('Цена', product.price, 'price-' + product.id));
+            infoBlock.appendChild(this.createInfoInput('Количество', product.amount, 'amount-' + product.id));
+
+            let buttonsBlock = createEl('div', "product-card-buttons-block", `<button class="product-card-img-edit-button btn btn-success btn-sm" id="product-submit-${product.id}">Сохранить</button>
+                        <button class="product-card-img-edit-button btn btn-danger btn-sm product-card-buttons-delete" id="product-delete-${product.id}">Удалить</button>`);
+            infoBlock.appendChild(buttonsBlock);
+
+            return infoBlock;
+        }
+
+        createInfoInput(name, value, inputId) {
+            let input = createEl('div', 'input-group input-group-sm mb-3');
+
+            let inputTitle = createEl('div', 'input-group-prepend', `<span class="input-group-text" id="">${name}</span>`);
+
+            let inputField = createEl('input', 'form-control');
+            inputField.type = 'text';
+            inputField.value = value;
+            inputField.id = 'product-card-info-' + inputId;
+
+            input.appendChild(inputTitle);
+            input.appendChild(inputField);
+            return input;
+        }
+    }
+
+
+    /* --- APPLICATION BLOCK --- */
 
     class AdminSPA
     {
-        appNode;
         orders;
         users;
+        products;
+
+        contentBlock;
 
         constructor() {
-            this.appNode = document.querySelector("#app");
-            let ord = [
-                {
-                    id: 1,
-                    customer: 'Daniel',
-                    productList: [
-                        {name: 'macbook', count: 12},
-                        {name: 'iphone', count: 12},
-                    ],
-                },
-                {
-                    id: 2,
-                    customer: 'Daniel',
-                    productList: [
-                        {name: 'macbook', count: 12},
-                        {name: 'iphone', count: 12},
-                    ],
-                },
-            ]
-            this.orders = new Orders(ord);
+            debugger;
+            this.orders = new Orders();
+            this.products = new Products();
             this.users = new Users();
 
-            this.appNode.append(this.orders.ordersNode)
+            this.contentBlock = document.querySelector('#app');
+            this.contentBlock.appendChild(this.orders.getContent());
+            this.contentBlock.appendChild(this.products.getContent());
+            this.contentBlock.appendChild(this.users.getContent());
+            this.loadProducts();
+        }
+
+        loadProducts() {
+            debugger;
+            fetch('/products').then(response => response.json()).then(data => {
+                debugger;
+                if (data.product_list !== undefined) {
+                    data.product_list.forEach(product => {
+                        this.products.addProduct({
+                            id: product.id,
+                            img: product.image,
+                            name: product.name,
+                            price: product.price,
+                            amount: product.amount
+                        });
+                    });
+                }
+            });
         }
 
         openUsers() {
-            this.orders.ordersNode.hidden = true;
+            this.orders.hide();
+            this.products.hide();
+            this.users.showContent();
         }
 
         openOrder() {
-            this.orders.ordersNode.hidden = false;
+            this.products.hide();
+            this.users.hide();
+            this.orders.showContent();
+        }
+
+        openProducts() {
+            this.users.hide();
+            this.orders.hide();
+            this.products.showContent();
         }
     }
 
 
     let app = new AdminSPA();
-
+    app.openProducts();
 </script>
 </body>
 </html>
