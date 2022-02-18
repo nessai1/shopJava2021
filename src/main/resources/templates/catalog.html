@@ -472,12 +472,7 @@
             let requestData = {
                 user: userData,
                 address: orderAddress,
-                products: [
-                    {
-                        id: 1,
-                        count: 15,
-                    },
-                ],
+                products: this.formProductList(),
             }
 
             fetch('/order', {
@@ -489,6 +484,14 @@
             }).then(response => response.json()).then(data => {
                 this.showSuccess();
             })
+        }
+
+        formProductList() {
+            let positionList = [];
+            this.orderProductList.forEach(product => {
+                positionList.push({id: product.id, count: product.count});
+            });
+            return positionList;
         }
 
         createOrderPosition(name, count, img) {
