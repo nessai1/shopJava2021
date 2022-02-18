@@ -34,6 +34,6 @@ public class Product {
 
     @NotNull
     @Schema(description = "Weight of the product", required = true)
-    @JsonProperty("weight")
-    private BigDecimal weight;
+    @JsonProperty("amount")
+    private Double amount;
 }

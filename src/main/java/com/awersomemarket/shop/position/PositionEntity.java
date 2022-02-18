@@ -1,5 +1,6 @@
 package com.awersomemarket.shop.position;
 
+import com.awersomemarket.shop.orders.OrderEntity;
 import com.awersomemarket.shop.product.ProductEntity;
 import lombok.*;
 
@@ -23,5 +24,12 @@ public class PositionEntity {
     private ProductEntity product;
 
     @Setter(AccessLevel.PROTECTED)
+    @Column(name = "COUNT", nullable = false, unique = false)
     private Integer count;
+
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false)
+    private OrderEntity order;
 }

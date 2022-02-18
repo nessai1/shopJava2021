@@ -23,17 +23,13 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
 
     @Setter(AccessLevel.PROTECTED)
-    @Column(name = "phone", nullable = false, unique = true)
+    @Column(name = "PHONE", nullable = false, unique = true)
     @NaturalId(mutable = true)
     private String phone;
 
     @Setter(AccessLevel.PROTECTED)
-    @Column(name = "age")
-    private Integer age;
-
-    @Setter(AccessLevel.PROTECTED)
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    @Column(name = "NAME", nullable = false, unique = false)
+    private String name;
 
     @Setter(AccessLevel.PROTECTED)
     @ToString.Exclude

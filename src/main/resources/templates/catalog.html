@@ -560,11 +560,27 @@
             this.hideLoader();
             this.productList.showProductList();
         }
+
+        loadProducts() {
+            fetch('/products').then(response => response.json()).then(data => {
+                if (data.product_list !== undefined) {
+                    data.product_list.forEach(product => {
+                        this.addProduct({
+                            id: product.id,
+                            img: product.image,
+                            name: product.name,
+                            price: product.price
+                        });
+                    });
+                }
+            }).then(() => {
+                this.showProducts();
+            });
+        }
     }
 
     let app = new App();
-    app.addProduct({id: 1, name: 'mak', img: '/macbook-silver16.jpeg', price: 300000});
-    app.addProduct({id: 2, name: 'mak', img: '/macbook-silver16.jpeg', price: 300000});
+    app.loadProducts();
 
 </script>
 </body>

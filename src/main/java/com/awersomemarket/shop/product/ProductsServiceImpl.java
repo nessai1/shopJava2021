@@ -27,7 +27,7 @@ public class ProductsServiceImpl implements ProductsService {
             product.setPrice(c.getPrice());
             product.setName(c.getName());
             product.setImage(c.getImage());
-            product.setWeight(c.getWeight());
+            product.setAmount(c.getAmount());
             return product;
         }).collect(Collectors.toList());
 
