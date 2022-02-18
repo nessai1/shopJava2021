@@ -1,6 +1,7 @@
 package com.awersomemarket.shop.rest.controller;
 
 
+import com.awersomemarket.shop.orders.OrderServiceImpl;
 import com.awersomemarket.shop.rest.dto.Customer;
 import com.awersomemarket.shop.rest.dto.Order;
 import com.awersomemarket.shop.rest.dto.status.Status;
@@ -17,20 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class OrderController {
 
-    private final UserServiceImpl userService;
+    private final OrderServiceImpl orderService;
 
     @Autowired
-    public OrderController(UserServiceImpl userService) {
-        this.userService = userService;
+    public OrderController(OrderServiceImpl orderService) {
+        this.orderService = orderService;
     }
 
     @PostMapping(value = "/order", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Status order(@RequestBody Order order)
     {
-
+        this.orderService.createOrder(order);
         Status st = new Status();
         st.setCode(StatusCode.OK);
-
         return st;
     }
 }

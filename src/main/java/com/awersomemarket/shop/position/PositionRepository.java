@@ -10,5 +10,4 @@ import java.util.List;
 @Repository
 public interface PositionRepository extends JpaRepository<PositionEntity, Long> {
 
-    List<PositionEntity> getPositionEntitiesByOrder(OrderEntity order);
 }

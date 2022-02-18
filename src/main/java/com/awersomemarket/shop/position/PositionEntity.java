@@ -24,12 +24,11 @@ public class PositionEntity {
     private ProductEntity product;
 
     @Setter(AccessLevel.PROTECTED)
-    @Column(name = "COUNT", nullable = false, unique = false)
     private Double count;
-
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false)
-    private OrderEntity order;
+//
+//    @Setter(AccessLevel.PROTECTED)
+//    @ToString.Exclude
+//    @ManyToOne(fetch = FetchType.EAGER)
+//    @JoinColumn(nullable = false)
+//    private OrderEntity order;
 }

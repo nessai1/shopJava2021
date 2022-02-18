@@ -38,9 +38,8 @@ public class OrderEntity {
     private String address;
 
     @Setter(AccessLevel.PROTECTED)
-    @ToString.Exclude
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false)
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "order_id")
     private List<PositionEntity> positions;
 
     @Override

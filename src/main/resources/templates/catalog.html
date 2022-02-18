@@ -395,6 +395,7 @@
             this.orderFormApply.addEventListener('click', this.applyForm.bind(this), false);
         }
 
+
         getUserData() {
             return {
                 name: document.querySelector('#order-name').value,
@@ -405,20 +406,20 @@
         }
 
         applyForm() {
+            this.orderFormApply.disabled = true;
+
             let userData = this.getUserData();
             console.log('form data: ', userData, this.orderProductList);
-
+            let orderAddress = userData.address;
+            userData.address = undefined;
             let requestData = {
                 user: userData,
+                address: orderAddress,
                 products: [
                     {
                         id: 1,
                         count: 15,
                     },
-                    {
-                        id: 2,
-                        count: 3
-                    }
                 ],
             }
 

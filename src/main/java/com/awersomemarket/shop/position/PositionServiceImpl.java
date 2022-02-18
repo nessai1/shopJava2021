@@ -1,5 +1,6 @@
 package com.awersomemarket.shop.position;
 
+import com.awersomemarket.shop.orders.OrderEntity;
 import com.awersomemarket.shop.product.ProductEntity;
 import com.awersomemarket.shop.product.ProductsServiceImpl;
 import com.awersomemarket.shop.rest.dto.position.Position;
@@ -32,7 +33,6 @@ public class PositionServiceImpl implements PositionService {
             return entity;
         }).collect(Collectors.toList());
 
-        this.positionRepository.saveAllAndFlush(entityList);
         return entityList;
     }
 }

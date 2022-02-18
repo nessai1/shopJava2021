@@ -1,5 +1,6 @@
 package com.awersomemarket.shop.orders;
 
+import com.awersomemarket.shop.position.PositionEntity;
 import com.awersomemarket.shop.position.PositionServiceImpl;
 import com.awersomemarket.shop.product.ProductEntity;
 import com.awersomemarket.shop.rest.dto.Customer;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -37,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
         createdOrder.setUser(orderUser);
         createdOrder.setAddress(order.getAddress());
         createdOrder.setStatus(OrderStatus.CREATED);
+
         createdOrder.setPositions(this.positionService.extractPositions(order.getPositionList()));
         this.orderRepository.saveAndFlush(createdOrder);
     }
