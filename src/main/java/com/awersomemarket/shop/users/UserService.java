@@ -6,7 +6,7 @@ public interface UserService {
 
     Customer findByPhone(String phone);
 
-    Customer createIfNotExits(Customer user);
+    UserEntity createIfNotExits(Customer user);
 
     void createUser(Customer user);
 }

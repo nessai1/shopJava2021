@@ -27,7 +27,7 @@ public class OrderController {
     @PostMapping(value = "/order", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Status order(@RequestBody Order order)
     {
-        System.out.println(12);
+
         Status st = new Status();
         st.setCode(StatusCode.OK);
 

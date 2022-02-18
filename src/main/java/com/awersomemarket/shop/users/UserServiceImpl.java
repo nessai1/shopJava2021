@@ -36,12 +36,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Customer createIfNotExits(Customer user) {
+    public UserEntity createIfNotExits(Customer user) {
         if (!userRepository.existsByPhone(user.getPhone())) {
             this.createUser(user);
         }
 
-        return this.findByPhone(user.getPhone());
+        return userRepository.getByPhone(user.getPhone());
     }
 
 

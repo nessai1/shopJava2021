@@ -35,4 +35,8 @@ public class ProductsServiceImpl implements ProductsService {
         products.setProductList(productList);
         return products;
     }
+
+    public ProductEntity getProductById(Long id) {
+        return this.productRepository.getProductEntityById(id);
+    }
 }

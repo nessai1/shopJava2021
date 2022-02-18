@@ -25,7 +25,7 @@ public class PositionEntity {
 
     @Setter(AccessLevel.PROTECTED)
     @Column(name = "COUNT", nullable = false, unique = false)
-    private Integer count;
+    private Double count;
 
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
