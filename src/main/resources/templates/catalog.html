@@ -14,7 +14,7 @@
     <div class="popup__menu">
         <button class="popup__exit" id="popupExit">x</button>
         <div class="ordermenu">
-            <div class="ordermenu__list">
+            <div id="ordermenu-list" class="ordermenu__list">
                 <ul class="orderlist" id="orderList">
                     <li class="orderlist__product">
                         <img src="product-puc.jpeg" alt="" class="orderlist__product__img">
@@ -54,13 +54,18 @@
                 </ul>
                 <span class="ordermenu__summary" id="orderSummary">Всего: 231000 Руб.</span>
             </div>
-            <div class="ordermenu__info">
+            <div class="ordermenu__info" id="ordermenu-info">
                 <input type="text" id="order-name" class="orderinput" placeholder="ФИО">
                 <input type="text" id="order-email" class="orderinput" placeholder="E-Mail">
                 <input type="text" id="order-phone" class="orderinput" placeholder="Номер телефона">
                 <input type="text" id="order-address" class="orderinput" placeholder="Адрес доставки">
                 <button class="buy-button" id="order-apply" style="margin-top: 20px">Оформить заказ</button>
+                <div class="order-loader" id="order-loader">
+                    <img class="spinner spinner_mini" src="/spinner.svg"/>
+                </div>
+                <p class="error-message" id="order-error-message"></p>
             </div>
+            <p class="thanks" id="thanks">Спасибо за заказ!</p>
         </div>
     </div>
 </div>
@@ -381,6 +386,11 @@
 
         orderProductList;
 
+        spinner;
+
+        loadBg = "rgb(182 184 187)";
+        activeBg = "rgb(0, 113, 227)";
+
 
 
         constructor() {
@@ -390,6 +400,8 @@
             this.popupExit.addEventListener('click', this.hideOrder.bind(this), false);
             this.productList = document.querySelector('#orderList');
             this.orderSummary = document.querySelector('#orderSummary');
+
+            this.spinner = document.querySelector('#order-loader');
 
             this.orderFormApply = document.querySelector('#order-apply');
             this.orderFormApply.addEventListener('click', this.applyForm.bind(this), false);
@@ -405,10 +417,55 @@
             };
         }
 
-        applyForm() {
+        enableLoader() {
             this.orderFormApply.disabled = true;
+            this.orderFormApply.style.backgroundColor = "rgb(182 184 187)";
+            this.spinner.style.display = 'block';
+        }
 
+        showError(message) {
+            document.querySelector('#order-error-message').innerHTML = message;
+            document.querySelector('#order-error-message').style.display = 'block';
+        }
+
+        hideError() {
+            document.querySelector('#order-error-message').style.display = 'none';
+        }
+
+        applyForm() {
+            this.hideError();
+            document.querySelector('#order-name').style.backgroundColor = '#ffffff';
+            document.querySelector('#order-email').style.backgroundColor = '#ffffff';
+            document.querySelector('#order-phone').style.backgroundColor = '#ffffff';
+            document.querySelector('#order-address').style.backgroundColor = '#ffffff';
             let userData = this.getUserData();
+
+            debugger;
+            let empty = 0;
+            if (userData.name === '') {
+                empty++;
+                document.querySelector('#order-name').style.backgroundColor = 'rgb(255,119,119)';
+            }
+            if (userData.email === '') {
+                empty++;
+                document.querySelector('#order-email').style.backgroundColor = 'rgb(255,119,119)';
+            }
+            if (userData.phone === '') {
+                empty++;
+                document.querySelector('#order-phone').style.backgroundColor = 'rgb(255,119,119)';
+            }
+            if (userData.address === '') {
+                empty++;
+                document.querySelector('#order-address').style.backgroundColor = 'rgb(255,119,119)';
+            }
+
+            if (empty > 0)
+            {
+                this.showError("Для оформления заказа нужно заполнить все поля!")
+                return;
+            }
+
+            this.enableLoader();
             console.log('form data: ', userData, this.orderProductList);
             let orderAddress = userData.address;
             userData.address = undefined;
@@ -430,7 +487,7 @@
                 },
                 body: JSON.stringify(requestData),
             }).then(response => response.json()).then(data => {
-                console.log(data);
+                this.showSuccess();
             })
         }
 
@@ -470,6 +527,18 @@
             this.orderSummary.innerHTML = "Всего: " + summary + " руб.";
             this.showOrder();
         }
+
+        showSuccess() {
+            /* это мегажесткий костыль, но я тороплюсь... */
+            document.querySelector('#ordermenu-info').innerHTML = '';
+            document.querySelector('#ordermenu-info').style.width = '0';
+            document.querySelector('#ordermenu-info').style.padding = '0';
+            document.querySelector('#ordermenu-list').innerHTML = '';
+            document.querySelector('#ordermenu-list').style.width = '0';
+            document.querySelector('#ordermenu-list').style.padding = '0';
+            document.querySelector('#thanks').style.display = 'block';
+            setTimeout(() => location.reload(), 2000);
+        }
     }
 
     class App {
@@ -504,7 +573,6 @@
 
 
         setCount(productId, count) {
-            debugger;
             if (this.allProducts[productId].count == count)
             {
                 return;

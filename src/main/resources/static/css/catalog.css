@@ -356,3 +356,35 @@ header {
         transform: rotate(720deg);
     }
 }
+
+
+.spinner_mini {
+    margin: 0 !important;
+    width: 30px !important;
+}
+
+.order-loader {
+    display: none;
+    position: relative;
+    top: -30px;
+    left: -45px;
+}
+
+.error-message {
+    padding: 20px;
+    color: #750f0f;
+    background-color: #ffa1a1;
+    border-radius: 12px;
+    border: 1px #830e0e solid;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    display: none;
+}
+
+.thanks {
+    display: none;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 60px;
+    margin: 200px auto 0;
+}
