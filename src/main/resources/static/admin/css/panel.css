@@ -274,6 +274,15 @@ body {
 }
 
 
+.orders-list {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.order-card-product-positions-position {
+    margin-bottom: 10px !important;
+}
+
 
 
 

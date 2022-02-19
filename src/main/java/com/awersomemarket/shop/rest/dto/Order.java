@@ -1,5 +1,6 @@
 package com.awersomemarket.shop.rest.dto;
 
+import com.awersomemarket.shop.orders.OrderStatus;
 import com.awersomemarket.shop.rest.dto.position.Position;
 import com.awersomemarket.shop.rest.dto.position.Positions;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,6 +33,11 @@ public class Order {
     @JsonProperty
     @Schema(description = "Customer data", required = true)
     private Customer user;
+
+    @Null
+    @JsonProperty("status")
+    @Schema(description = "Status of the order", required = false)
+    private OrderStatus orderStatus;
 
     @NotNull
     @Schema(description = "List of product positions", required = true)

@@ -1,5 +1,6 @@
 package com.awersomemarket.shop.orders;
 
+import com.awersomemarket.shop.exception.IncorrectOrderStatusChangeException;
 import com.awersomemarket.shop.position.PositionEntity;
 import com.awersomemarket.shop.position.PositionServiceImpl;
 import com.awersomemarket.shop.product.ProductEntity;
@@ -38,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
             Order order = new Order();
             order.setId(c.getId());
             order.setAddress(c.getAddress());
+            order.setOrderStatus(c.getStatus());
 
             Customer orderCustomer = new Customer();
             orderCustomer.setName(c.getUser().getName());
@@ -49,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
             List<Position> positions = positionEntities.stream().map(p -> {
                 Position position = new Position();
                 position.setCount(p.getCount());
-                position.setId(p.getId());
+                position.setId(p.getProduct().getId());
 
                 return position;
             }).collect(Collectors.toList());
@@ -63,6 +65,23 @@ public class OrderServiceImpl implements OrderService {
         orders.setOrderList(orderList);
         return orders;
     }
+
+    @Override
+    public void changeOrderStatus(Order order) throws IncorrectOrderStatusChangeException {
+        OrderEntity orderEntity = this.orderRepository.getById(order.getId());
+
+        if (!checkStatusMigration(orderEntity.getStatus(), order.getOrderStatus())) {
+            throw new IncorrectOrderStatusChangeException("Переход на указанный статус невозможен");
+        }
+
+        orderEntity.setStatus(order.getOrderStatus());
+        orderRepository.saveAndFlush(orderEntity);
+    }
+
+    protected boolean checkStatusMigration(OrderStatus before, OrderStatus after) {
+        return true;
+    }
+
 
 
     @Override

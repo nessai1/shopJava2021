@@ -388,3 +388,12 @@ header {
     font-size: 60px;
     margin: 200px auto 0;
 }
+
+.orders-list {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.order-card-product-positions-position {
+    margin-bottom: 10px !important;
+}

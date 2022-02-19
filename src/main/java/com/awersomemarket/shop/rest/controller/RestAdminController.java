@@ -1,5 +1,6 @@
 package com.awersomemarket.shop.rest.controller;
 
+import com.awersomemarket.shop.exception.IncorrectOrderStatusChangeException;
 import com.awersomemarket.shop.exception.ProductHavePositionsException;
 import com.awersomemarket.shop.orders.OrderServiceImpl;
 import com.awersomemarket.shop.product.ProductsServiceImpl;
@@ -26,6 +27,22 @@ public class RestAdminController {
     RestAdminController(ProductsServiceImpl productsService, OrderServiceImpl orderService) {
         this.orderService = orderService;
         this.productsService = productsService;
+    }
+
+    @PutMapping(value = "/order", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Status changeOrderStatus(@RequestBody Order order) throws IncorrectOrderStatusChangeException {
+        Status st = new Status();
+
+        try {
+            this.orderService.changeOrderStatus(order);
+            st.setCode(StatusCode.OK);
+        }
+        catch (IncorrectOrderStatusChangeException e) {
+            st.setCode(StatusCode.INVALID_DATA);
+            st.setErrorDescription(e.getMessage());
+        }
+
+        return st;
     }
 
     @GetMapping(value = "/orders", produces = MediaType.APPLICATION_JSON_VALUE)

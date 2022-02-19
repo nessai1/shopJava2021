@@ -9,4 +9,6 @@ public interface OrderService {
     void createOrder(Order order);
 
     Orders getOrders();
+
+    void changeOrderStatus(Order order);
 }

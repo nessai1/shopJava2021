@@ -114,13 +114,67 @@
         titleBlock;
         statusBlock;
         changeStatusBlock;
-        customerBlock;
+        shortBlock;
         detailBlock;
 
         constructor(orderData) {
             this.order = orderData;
             this.card = createEl('div', 'order-card');
             this.card.appendChild(this.createTitle(orderData));
+            this.card.appendChild(this.createShortInfo());
+            this.card.appendChild(this.createFullInfo());
+        }
+
+        createFullInfo() {
+            this.detailBlock = createEl('div', 'order-card-full-info');
+            let detailButton = createEl('button', 'btn btn-primary', 'Полная информация');
+            detailButton.dataset.type = 'button';
+            detailButton.dataset.toggle = 'collapse';
+            detailButton.dataset.target = '#orderFull-'+this.order.id;
+            detailButton.ariaExpanded = false;
+            detailButton.ariaControls = 'orderFull-'+this.order.id;
+
+            let detail = createEl('div', 'collapse order-card-full-info-content');
+            detail.id = 'orderFull-'+this.order.id;
+
+            let sum = 0;
+            let productsInfo = '';
+            this.order.products.forEach(product => {
+                let fullProduct = app.products.products[product.id];
+                if (fullProduct !== undefined)
+                {
+                    productsInfo += `<div class="order-card-product-positions-position">
+                                    <img src="${fullProduct.img}" class="order-position-img">
+                                    <div class="order-position-info">
+                                        <span class="order-position-info-title">${fullProduct.name}</span>
+                                        <span class="order-position-info-count">Количество: <span class="order-position-info-count-count">${product.count}</span></span>
+                                    </div>
+                                </div>`;
+
+                    sum += fullProduct.price * product.count;
+                }
+
+            });
+
+            let address = `<span class="font-weight-bold">Адресс доставки:</span> ${this.order.address}`;
+            let sumTxt = `<span class="font-weight-bold">Сумма сделки:</span> ${sum} руб.`;
+            detail.appendChild(createEl('p', '', address));
+            detail.appendChild(createEl('p', '', sumTxt));
+            detail.appendChild(createEl('div', 'order-card-product-positions', productsInfo));
+
+            this.detailBlock.appendChild(detailButton);
+            this.detailBlock.appendChild(detail);
+
+            return this.detailBlock;
+        }
+
+        createShortInfo() {
+            this.shortBlock = createEl('div', 'order-card-short-info');
+            this.shortBlock.appendChild(createEl('div', 'short-info-block', `<span class="short-info-title">Покупатель</span>
+                        <span class="short-info-content">${this.order.user.name}</span>
+                        <a class="short-info-content" href="tel: ${this.order.user.phone}" type="phone">${this.order.user.phone}</a>`));
+
+            return this.shortBlock;
         }
 
         createTitle(orderData) {
@@ -232,6 +286,24 @@
         }
 
         dispatchStatus(status) {
+            let orderDataRequest = this.order;
+            orderDataRequest.status = status;
+            fetch('/admin/order', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderDataRequest),
+
+
+            }).then(response => response.json()).then(data => {
+                if(data.code === 'OK') {
+                    location.reload();
+                }
+                else {
+                    console.log('Сервер: - Запрос фигня :)');
+                }
+            })
             console.log(`${this.order.id} WANTS TO BE ${status}`);
         }
 
@@ -248,14 +320,20 @@
 
         constructor(orders = []) {
             super();
+            this.content.className = 'orders-list'
             this.orders = orders;
             orders.forEach(order => {
                 this.addOrder(order);
             });
         }
 
+        showContent() {
+            this.content.style.display = 'flex';
+            this.content.style.flexDirection = 'column-reverse';
+        }
+
         addOrder(orderData) {
-            this.orders.push(orderData);
+            this.orders[orderData.id] = orderData;
 
             let orderCard = new OrderCard(orderData);
             this.cards.push(orderCard);
@@ -307,7 +385,6 @@
                     price: 0,
                 }),
             }).then(response => response.json()).then(data => {
-                debugger;
                 if(data.code === 'OK') {
                     location.reload();
                 }
@@ -440,7 +517,6 @@
         }
 
         deleteProductAction(event) {
-            debugger;
             if (parseInt(this.product.id) === parseInt(event.path[0].dataset.productId))
             {
                 this.deleteProduct();
@@ -539,7 +615,6 @@
         async loadData() {
             fetch('/products').then(response => response.json()).then(data => {
                 if (data.product_list !== undefined) {
-                    debugger;
                     data.product_list.forEach(product => {
                         this.products.addProduct({
                             id: product.id,
@@ -557,11 +632,6 @@
 
         extractOrders(orders) {
             orders.forEach(order => {
-                order.prdocuts.forEach(product => {
-                    let count = product.count;
-                    product = this.products.products[product.id];
-                    product.count = count;
-                });
                 this.orders.addOrder(order);
             })
         }
