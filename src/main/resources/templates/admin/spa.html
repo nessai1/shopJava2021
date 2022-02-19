@@ -126,13 +126,55 @@
 
     class Products extends Component
     {
+        productsBlock;
         products;
         productCards = [];
+        addBtn;
+
+        createNewProduct() {
+            this.addBtn.disabled = true;
+
+            let productObject = {
+                product: {
+                    name: 'Новый товар',
+                    amount: 0,
+                    price: 0,
+                }
+            };
+
+            fetch('/admin/product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: 'Новый товар',
+                    amount: 0,
+                    price: 0,
+                }),
+            }).then(response => response.json()).then(data => {
+                debugger;
+                if(data.code === 'OK') {
+                    location.reload();
+                }
+                else {
+                    console.log('Сервер: - Что за какашку ты мне подсунул? Переделывай :)');
+                }
+            })
+        }
 
         constructor(pList = []) {
             super();
-
             this.products = pList;
+            this.productsBlock = createEl('div');
+
+            this.addBtn = createEl('button', 'product-card-img-edit-button btn btn-primary', 'Создать новый товар');
+            this.addBtn.addEventListener('click', this.createNewProduct.bind(this), false);
+            this.addBtn.id = 'add-new-product-btn';
+
+            this.content.appendChild(this.productsBlock);
+            this.content.appendChild(this.addBtn);
+
             pList.forEach(product => {
                 this.addProduct(product);
             });
@@ -141,7 +183,8 @@
         addProduct(product) {
             let productCard = new ProductCard(product);
             this.products.push(product);
-            this.content.appendChild(productCard.getCard());
+            this.productsBlock.appendChild(productCard.getCard());
+            this.productCards.push(productCard)
         }
     }
 
@@ -150,6 +193,8 @@
 
         product;
         card;
+        errorBlock;
+        successBlock;
 
         constructor(product) {
             this.product = product;
@@ -197,11 +242,105 @@
             infoBlock.appendChild(this.createInfoInput('Цена', product.price, 'price-' + product.id));
             infoBlock.appendChild(this.createInfoInput('Количество', product.amount, 'amount-' + product.id));
 
-            let buttonsBlock = createEl('div', "product-card-buttons-block", `<button class="product-card-img-edit-button btn btn-success btn-sm" id="product-submit-${product.id}">Сохранить</button>
-                        <button class="product-card-img-edit-button btn btn-danger btn-sm product-card-buttons-delete" id="product-delete-${product.id}">Удалить</button>`);
+            let saveButton = createEl('button', 'product-card-img-edit-button btn btn-success btn-sm', 'Сохранить');
+            saveButton.id = `product-submit-${product.id}`;
+            saveButton.dataset.productId = product.id;
+            saveButton.addEventListener('click', this.saveProductAction.bind(this), false);
+
+            let deleteButton = createEl('button', 'product-card-img-edit-button btn btn-danger btn-sm product-card-buttons-delete', 'Удалить');
+            deleteButton.id = `product-delete-${product.id}`;
+            deleteButton.dataset.productId = product.id;
+            deleteButton.addEventListener('click', this.deleteProductAction.bind(this), false);
+
+            let buttonsBlock = createEl('div', "product-card-buttons-block");
+            buttonsBlock.appendChild(saveButton);
+            buttonsBlock.appendChild(deleteButton);
+
+
             infoBlock.appendChild(buttonsBlock);
 
+            this.errorBlock = createEl('p', 'text-danger');
+            this.errorBlock.style.marginTop = '10px';
+            this.errorBlock.style.display = 'none';
+            infoBlock.appendChild(this.errorBlock);
+
+            this.successBlock = createEl('p', 'text-success');
+            this.successBlock.style.marginTop = '10px';
+            this.successBlock.style.display = 'none';
+            infoBlock.appendChild(this.successBlock);
+
             return infoBlock;
+        }
+
+        showError(msg) {
+            this.errorBlock.innerHTML = msg;
+            this.successBlock.style.display = 'none';
+            this.errorBlock.style.display = 'block';
+
+        }
+
+        showSuccess(msg) {
+            this.successBlock.innerHTML = msg;
+            this.errorBlock.style.display = 'none';
+            this.successBlock.style.display = 'block';
+        }
+
+        deleteProductAction(event) {
+            debugger;
+            if (parseInt(this.product.id) === parseInt(event.path[0].dataset.productId))
+            {
+                this.deleteProduct();
+            }
+        }
+
+        deleteProduct() {
+
+            let productData = this.product;
+
+            fetch('/admin/product', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData),
+            }).then(response => response.json()).then(data => {
+                if (data.code === 'OK') {
+                    location.reload();
+                }
+                else {
+                    this.showError(data.errorDescription);
+                }
+            })
+        }
+
+        saveProductAction(event) {
+            let productId = event.path[0].dataset.productId;
+            let productData = this.collectProduct(productId);
+
+            fetch('/admin/product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData),
+            }).then(response => response.json()).then(data => {
+                if (data.code === 'OK') {
+                    this.showSuccess("Товар успешно сохранен!");
+                }
+                else {
+                    this.showError(data.errorDescription);
+                }
+            })
+        }
+
+        collectProduct(productId) {
+            return {
+                name: this.card.querySelector(`#product-card-info-name-${productId}`).value,
+                price: this.card.querySelector(`#product-card-info-price-${productId}`).value,
+                amount: this.card.querySelector(`#product-card-info-amount-${productId}`).value,
+                id: productId,
+                img: this.product.img
+            }
         }
 
         createInfoInput(name, value, inputId) {
@@ -232,7 +371,6 @@
         contentBlock;
 
         constructor() {
-            debugger;
             this.orders = new Orders();
             this.products = new Products();
             this.users = new Users();
@@ -245,9 +383,7 @@
         }
 
         loadProducts() {
-            debugger;
             fetch('/products').then(response => response.json()).then(data => {
-                debugger;
                 if (data.product_list !== undefined) {
                     data.product_list.forEach(product => {
                         this.products.addProduct({

@@ -35,4 +35,9 @@ public class PositionServiceImpl implements PositionService {
 
         return entityList;
     }
+
+    @Override
+    public List<PositionEntity> getPositionsByProduct(ProductEntity productEntity) {
+        return this.positionRepository.getPositionEntitiesByProduct(productEntity);
+    }
 }

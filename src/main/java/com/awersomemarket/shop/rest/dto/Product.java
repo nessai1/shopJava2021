@@ -6,14 +6,15 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 
 @Data
 @Schema(description = "Info about product")
 @Validated
 public class Product {
-    @NotNull
-    @Schema(description = "id", required = true)
+    @Null
+    @Schema(description = "id", required = false)
     @JsonProperty("id")
     private Long id;
 
@@ -27,8 +28,8 @@ public class Product {
     @JsonProperty("price")
     private BigDecimal price;
 
-    @NotNull
-    @Schema(description = "Image of the product", required = true)
+    @Null
+    @Schema(description = "Image of the product", required = false)
     @JsonProperty("image")
     private String image;
 
