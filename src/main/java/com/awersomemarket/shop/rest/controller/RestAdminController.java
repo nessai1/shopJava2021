@@ -1,7 +1,10 @@
 package com.awersomemarket.shop.rest.controller;
 
 import com.awersomemarket.shop.exception.ProductHavePositionsException;
+import com.awersomemarket.shop.orders.OrderServiceImpl;
 import com.awersomemarket.shop.product.ProductsServiceImpl;
+import com.awersomemarket.shop.rest.dto.Order;
+import com.awersomemarket.shop.rest.dto.Orders;
 import com.awersomemarket.shop.rest.dto.Product;
 import com.awersomemarket.shop.rest.dto.Products;
 import com.awersomemarket.shop.rest.dto.status.Status;
@@ -17,10 +20,17 @@ import org.springframework.web.bind.annotation.*;
 public class RestAdminController {
 
     private final ProductsServiceImpl productsService;
+    private final OrderServiceImpl orderService;
 
     @Autowired
-    RestAdminController(ProductsServiceImpl productsService) {
+    RestAdminController(ProductsServiceImpl productsService, OrderServiceImpl orderService) {
+        this.orderService = orderService;
         this.productsService = productsService;
+    }
+
+    @GetMapping(value = "/orders", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Orders orders() {
+        return this.orderService.getOrders();
     }
 
     @PostMapping(value = "/product", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

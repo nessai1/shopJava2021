@@ -11,6 +11,8 @@
     <link href="admin/css/panel.css" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -104,13 +106,163 @@
 
     /* --- ORDERS BLOCK --- */
 
-    class Orders extends Component
-    {
-        constructor(orders) {
-            super();
-            this.content.innerHTML = "orders";
+    class OrderCard {
+
+        order;
+        card;
+
+        titleBlock;
+        statusBlock;
+        changeStatusBlock;
+        customerBlock;
+        detailBlock;
+
+        constructor(orderData) {
+            this.order = orderData;
+            this.card = createEl('div', 'order-card');
+            this.card.appendChild(this.createTitle(orderData));
+        }
+
+        createTitle(orderData) {
+            this.titleBlock = createEl('div', 'order-card-title');
+            let title = createEl('span', 'order-card-title-text', `Заказ №${orderData.id}`);
+
+            this.statusBlock = this.getStatusBage(orderData.status);
+            this.changeStatusBlock = this.createChangeStatus(orderData.status, orderData.id);
+
+            this.titleBlock.appendChild(title);
+            this.titleBlock.appendChild(this.statusBlock);
+            this.titleBlock.appendChild(this.changeStatusBlock);
+            return this.titleBlock;
+        }
+
+        getStatusBage(status) {
+            if (status === 'CREATED') {
+                return createEl('span', 'badge badge-primary order-card-title-status', 'Создано');
+            }
+
+            if (status === 'CANCELED') {
+                return createEl('span', 'badge badge-danger order-card-title-status', 'Отменено');
+            }
+
+            if (status === 'PAID') {
+                return createEl('span', 'badge badge-success order-card-title-status', 'Оплачено');
+            }
+
+            if (status === 'DELIVERED') {
+                return createEl('span', 'badge badge-warning order-card-title-status', 'Отгружено');
+            }
+
+            return createEl('span', 'badge badge-secondary order-card-title-status', 'Завершено');
+        }
+
+        createChangeStatus(status, id) {
+            let changeStatus = createEl('div', 'dropdown order-card-status');
+
+            let changeBtn;
+            if (status === 'CANCELED' || status === 'DONE')
+            {
+                changeBtn = createEl('span', '');
+            }
+            else
+            {
+                changeBtn = createEl('a', 'btn btn-secondary dropdown-toggle btn-sm');
+                changeBtn.role = 'button';
+                changeBtn.id = 'dropdownMenuLink-' + id;
+                changeBtn.dataset.toggle = 'dropdown';
+                changeBtn.ariaHasPopup = true;
+                changeBtn.ariaExpanded = false;
+                changeBtn.innerText = 'Изменить статус на';
+                changeBtn.style.color = 'white';
+            }
+
+
+
+            let changeBtnList = this.getAvailableStatusesList(status, id);
+
+
+            changeStatus.appendChild(changeBtn);
+            changeStatus.appendChild(changeBtnList);
+            return changeStatus;
+        }
+
+        getAvailableStatusesList(status, id) {
+            let changeBtnList = createEl('div', 'dropdown-menu');
+            changeBtnList.arialabelledby = 'dropdownMenuLink-' + id;
+            changeBtnList.dataset.id = id;
+
+            if (status === 'CANCELED' || status === 'DONE')
+            {
+                let emptyNode = createEl('div', '');
+                emptyNode.style.display = 'none';
+                return emptyNode;
+            }
+
+            if (status === 'CREATED')
+            {
+                let pStatus = createEl('a', 'dropdown-item', 'Оплачено');
+                pStatus.dataset.status = 'PAID';
+                changeBtnList.appendChild(pStatus);
+            }
+            else if (status === 'PAID')
+            {
+                let delStatus = createEl('a', 'dropdown-item', 'Отгружено');
+                delStatus.dataset.status = 'DELIVERED';
+                changeBtnList.appendChild(delStatus);
+            }
+            else if (status === 'DELIVERED')
+            {
+                let doneStatus = createEl('a', 'dropdown-item', 'Доставлено');
+                doneStatus.dataset.status = 'DONE';
+                changeBtnList.appendChild(doneStatus);
+            }
+
+            let cancelStatus = createEl('a', 'dropdown-item', 'Отменено');
+            cancelStatus.dataset.status = 'CANCELED';
+            changeBtnList.appendChild(cancelStatus);
+
+            changeBtnList.addEventListener('click', this.dispatchStatusAction.bind(this), false);
+            return changeBtnList;
+        }
+
+        dispatchStatusAction(event) {
+            if (event.path[0].dataset.status !== undefined) {
+                this.dispatchStatus(event.path[0].dataset.status);
+            }
+        }
+
+        dispatchStatus(status) {
+            console.log(`${this.order.id} WANTS TO BE ${status}`);
+        }
+
+        getCard() {
+            return this.card;
         }
     }
+
+    class Orders extends Component
+    {
+        orders = [];
+        cards = [];
+
+
+        constructor(orders = []) {
+            super();
+            this.orders = orders;
+            orders.forEach(order => {
+                this.addOrder(order);
+            });
+        }
+
+        addOrder(orderData) {
+            this.orders.push(orderData);
+
+            let orderCard = new OrderCard(orderData);
+            this.cards.push(orderCard);
+            this.content.appendChild(orderCard.getCard());
+        }
+    }
+
 
     /* --- USERS BLOCK --- */
 
@@ -130,6 +282,8 @@
         products;
         productCards = [];
         addBtn;
+
+
 
         createNewProduct() {
             this.addBtn.disabled = true;
@@ -165,7 +319,7 @@
 
         constructor(pList = []) {
             super();
-            this.products = pList;
+            this.products = [];
             this.productsBlock = createEl('div');
 
             this.addBtn = createEl('button', 'product-card-img-edit-button btn btn-primary', 'Создать новый товар');
@@ -182,7 +336,7 @@
 
         addProduct(product) {
             let productCard = new ProductCard(product);
-            this.products.push(product);
+            this.products[product.id] = product;
             this.productsBlock.appendChild(productCard.getCard());
             this.productCards.push(productCard)
         }
@@ -379,12 +533,13 @@
             this.contentBlock.appendChild(this.orders.getContent());
             this.contentBlock.appendChild(this.products.getContent());
             this.contentBlock.appendChild(this.users.getContent());
-            this.loadProducts();
+            this.loadData();
         }
 
-        loadProducts() {
+        async loadData() {
             fetch('/products').then(response => response.json()).then(data => {
                 if (data.product_list !== undefined) {
+                    debugger;
                     data.product_list.forEach(product => {
                         this.products.addProduct({
                             id: product.id,
@@ -395,7 +550,20 @@
                         });
                     });
                 }
-            });
+            }).then(await fetch('/admin/orders').then(response => response.json()).then(data => {
+                this.extractOrders(data.order_list);
+            }));
+        }
+
+        extractOrders(orders) {
+            orders.forEach(order => {
+                order.prdocuts.forEach(product => {
+                    let count = product.count;
+                    product = this.products.products[product.id];
+                    product.count = count;
+                });
+                this.orders.addOrder(order);
+            })
         }
 
         openUsers() {

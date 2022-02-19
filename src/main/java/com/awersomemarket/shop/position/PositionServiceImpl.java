@@ -23,6 +23,8 @@ public class PositionServiceImpl implements PositionService {
         this.positionRepository = positionRepository;
     }
 
+
+
     @Override
     public List<PositionEntity> extractPositions(List<Position> positions) {
         List<PositionEntity> entityList = positions.stream().map(position -> {
