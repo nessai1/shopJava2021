@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="admin/css/panel.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="..">Admin Panel</a>
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <a class="nav-link" href="/admin/logout">Sign out</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="app.openOrder()">
+                            <i class="fa fa-truck icon_p"></i>
+                            Заказы
+                        </a>
+                    </li>
+                    <!-- template -->
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="app.openUsers()">
+                            <i class="fas fa-address-card icon_p"></i>
+                            Пользователи
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="app.openProducts()">
+                            <i class="fas fa-address-card icon_p"></i>
+                            Товары
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </nav>
+
+        <main id="app" role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+        </main>
+    </div>
+</div>
+
+
+<!-- Icons -->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
+    feather.replace()
+</script>
+
+<script src="admin/js/app.js"></script>
+<script>
+
+
+    function createEl(name, className, content = null) {
+        let el = document.createElement(name);
+        el.className = className;
+
+        if (content !== null)
+            el.innerHTML = content;
+
+        return el;
+    }
+
+    class Component
+    {
+        content;
+
+        constructor() {
+            this.content = createEl('div');
+            this.hide();
+        }
+
+        getContent() {
+            return this.content;
+        }
+
+        showContent() {
+            this.content.style.display = 'block';
+        }
+
+        hide() {
+            this.content.style.display = 'none';
+        }
+
+    }
+
+
+    /* --- ORDERS BLOCK --- */
+
+    class OrderCard {
+
+        order;
+        card;
+
+        titleBlock;
+        statusBlock;
+        changeStatusBlock;
+        shortBlock;
+        detailBlock;
+
+        constructor(orderData) {
+            this.order = orderData;
+            this.card = createEl('div', 'order-card');
+            this.card.appendChild(this.createTitle(orderData));
+            this.card.appendChild(this.createShortInfo());
+            this.card.appendChild(this.createFullInfo());
+        }
+
+        createFullInfo() {
+            this.detailBlock = createEl('div', 'order-card-full-info');
+            let detailButton = createEl('button', 'btn btn-primary', 'Полная информация');
+            detailButton.dataset.type = 'button';
+            detailButton.dataset.toggle = 'collapse';
+            detailButton.dataset.target = '#orderFull-'+this.order.id;
+            detailButton.ariaExpanded = false;
+            detailButton.ariaControls = 'orderFull-'+this.order.id;
+
+            let detail = createEl('div', 'collapse order-card-full-info-content');
+            detail.id = 'orderFull-'+this.order.id;
+
+            let sum = 0;
+            let productsInfo = '';
+            this.order.products.forEach(product => {
+                let fullProduct = app.products.products[product.id];
+                if (fullProduct !== undefined)
+                {
+                    productsInfo += `<div class="order-card-product-positions-position">
+                                    <img src="${fullProduct.img}" class="order-position-img">
+                                    <div class="order-position-info">
+                                        <span class="order-position-info-title">${fullProduct.name}</span>
+                                        <span class="order-position-info-count">Количество: <span class="order-position-info-count-count">${product.count}</span></span>
+                                    </div>
+                                </div>`;
+
+                    sum += fullProduct.price * product.count;
+                }
+
+            });
+
+            let address = `<span class="font-weight-bold">Адресс доставки:</span> ${this.order.address}`;
+            let sumTxt = `<span class="font-weight-bold">Сумма сделки:</span> ${sum} руб.`;
+            detail.appendChild(createEl('p', '', address));
+            detail.appendChild(createEl('p', '', sumTxt));
+            detail.appendChild(createEl('div', 'order-card-product-positions', productsInfo));
+
+            this.detailBlock.appendChild(detailButton);
+            this.detailBlock.appendChild(detail);
+
+            return this.detailBlock;
+        }
+
+        createShortInfo() {
+            this.shortBlock = createEl('div', 'order-card-short-info');
+            this.shortBlock.appendChild(createEl('div', 'short-info-block', `<span class="short-info-title">Покупатель</span>
+                        <span class="short-info-content">${this.order.user.name}</span>
+                        <a class="short-info-content" href="tel: ${this.order.user.phone}" type="phone">${this.order.user.phone}</a>`));
+
+            return this.shortBlock;
+        }
+
+        createTitle(orderData) {
+            this.titleBlock = createEl('div', 'order-card-title');
+            let title = createEl('span', 'order-card-title-text', `Заказ №${orderData.id}`);
+
+            this.statusBlock = this.getStatusBage(orderData.status);
+            this.changeStatusBlock = this.createChangeStatus(orderData.status, orderData.id);
+
+            this.titleBlock.appendChild(title);
+            this.titleBlock.appendChild(this.statusBlock);
+            this.titleBlock.appendChild(this.changeStatusBlock);
+            return this.titleBlock;
+        }
+
+        getStatusBage(status) {
+            if (status === 'CREATED') {
+                return createEl('span', 'badge badge-primary order-card-title-status', 'Создано');
+            }
+
+            if (status === 'CANCELED') {
+                return createEl('span', 'badge badge-danger order-card-title-status', 'Отменено');
+            }
+
+            if (status === 'PAID') {
+                return createEl('span', 'badge badge-success order-card-title-status', 'Оплачено');
+            }
+
+            if (status === 'DELIVERED') {
+                return createEl('span', 'badge badge-warning order-card-title-status', 'Отгружено');
+            }
+
+            return createEl('span', 'badge badge-secondary order-card-title-status', 'Завершено');
+        }
+
+        createChangeStatus(status, id) {
+            let changeStatus = createEl('div', 'dropdown order-card-status');
+
+            let changeBtn;
+            if (status === 'CANCELED' || status === 'DONE')
+            {
+                changeBtn = createEl('span', '');
+            }
+            else
+            {
+                changeBtn = createEl('a', 'btn btn-secondary dropdown-toggle btn-sm');
+                changeBtn.role = 'button';
+                changeBtn.id = 'dropdownMenuLink-' + id;
+                changeBtn.dataset.toggle = 'dropdown';
+                changeBtn.ariaHasPopup = true;
+                changeBtn.ariaExpanded = false;
+                changeBtn.innerText = 'Изменить статус на';
+                changeBtn.style.color = 'white';
+            }
+
+
+
+            let changeBtnList = this.getAvailableStatusesList(status, id);
+
+
+            changeStatus.appendChild(changeBtn);
+            changeStatus.appendChild(changeBtnList);
+            return changeStatus;
+        }
+
+        getAvailableStatusesList(status, id) {
+            let changeBtnList = createEl('div', 'dropdown-menu');
+            changeBtnList.arialabelledby = 'dropdownMenuLink-' + id;
+            changeBtnList.dataset.id = id;
+
+            if (status === 'CANCELED' || status === 'DONE')
+            {
+                let emptyNode = createEl('div', '');
+                emptyNode.style.display = 'none';
+                return emptyNode;
+            }
+
+            if (status === 'CREATED')
+            {
+                let pStatus = createEl('a', 'dropdown-item', 'Оплачено');
+                pStatus.dataset.status = 'PAID';
+                changeBtnList.appendChild(pStatus);
+            }
+            else if (status === 'PAID')
+            {
+                let delStatus = createEl('a', 'dropdown-item', 'Отгружено');
+                delStatus.dataset.status = 'DELIVERED';
+                changeBtnList.appendChild(delStatus);
+            }
+            else if (status === 'DELIVERED')
+            {
+                let doneStatus = createEl('a', 'dropdown-item', 'Доставлено');
+                doneStatus.dataset.status = 'DONE';
+                changeBtnList.appendChild(doneStatus);
+            }
+
+            let cancelStatus = createEl('a', 'dropdown-item', 'Отменено');
+            cancelStatus.dataset.status = 'CANCELED';
+            changeBtnList.appendChild(cancelStatus);
+
+            changeBtnList.addEventListener('click', this.dispatchStatusAction.bind(this), false);
+            return changeBtnList;
+        }
+
+        dispatchStatusAction(event) {
+            if (event.path[0].dataset.status !== undefined) {
+                this.dispatchStatus(event.path[0].dataset.status);
+            }
+        }
+
+        dispatchStatus(status) {
+            let orderDataRequest = this.order;
+            orderDataRequest.status = status;
+            fetch('/admin/order', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderDataRequest),
+
+
+            }).then(response => response.json()).then(data => {
+                if(data.code === 'OK') {
+                    location.reload();
+                }
+                else {
+                    console.log('Сервер: - Запрос фигня :)');
+                }
+            })
+            console.log(`${this.order.id} WANTS TO BE ${status}`);
+        }
+
+        getCard() {
+            return this.card;
+        }
+    }
+
+    class Orders extends Component
+    {
+        orders = [];
+        cards = [];
+
+
+        constructor(orders = []) {
+            super();
+            this.content.className = 'orders-list'
+            this.orders = orders;
+            orders.forEach(order => {
+                this.addOrder(order);
+            });
+        }
+
+        showContent() {
+            this.content.style.display = 'flex';
+            this.content.style.flexDirection = 'column-reverse';
+        }
+
+        addOrder(orderData) {
+            this.orders[orderData.id] = orderData;
+
+            let orderCard = new OrderCard(orderData);
+            this.cards.push(orderCard);
+            this.content.appendChild(orderCard.getCard());
+        }
+    }
+
+
+    /* --- USERS BLOCK --- */
+
+    class Users extends Component
+    {
+        constructor() {
+            super();
+            this.content.innerHTML = "users";
+        }
+    }
+
+    /* --- PRODUCTS BLOCK --- */
+
+    class Products extends Component
+    {
+        productsBlock;
+        products;
+        productCards = [];
+        addBtn;
+
+
+
+        createNewProduct() {
+            this.addBtn.disabled = true;
+
+            let productObject = {
+                product: {
+                    name: 'Новый товар',
+                    amount: 0,
+                    price: 0,
+                }
+            };
+
+            fetch('/admin/product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: 'Новый товар',
+                    amount: 0,
+                    price: 0,
+                }),
+            }).then(response => response.json()).then(data => {
+                if(data.code === 'OK') {
+                    location.reload();
+                }
+                else {
+                    console.log('Сервер: - Что за какашку ты мне подсунул? Переделывай :)');
+                }
+            })
+        }
+
+        constructor(pList = []) {
+            super();
+            this.products = [];
+            this.productsBlock = createEl('div');
+
+            this.addBtn = createEl('button', 'product-card-img-edit-button btn btn-primary', 'Создать новый товар');
+            this.addBtn.addEventListener('click', this.createNewProduct.bind(this), false);
+            this.addBtn.id = 'add-new-product-btn';
+
+            this.content.appendChild(this.productsBlock);
+            this.content.appendChild(this.addBtn);
+
+            pList.forEach(product => {
+                this.addProduct(product);
+            });
+        }
+
+        addProduct(product) {
+            let productCard = new ProductCard(product);
+            this.products[product.id] = product;
+            this.productsBlock.appendChild(productCard.getCard());
+            this.productCards.push(productCard)
+        }
+    }
+
+
+    class ProductCard {
+
+        product;
+        card;
+        errorBlock;
+        successBlock;
+
+        constructor(product) {
+            this.product = product;
+            this.card = createEl('div', 'product-card');
+            this.card.id = 'product-card-' + this.product.id;
+
+            let photoBlock = this.createPhotoBlock(this.product.id, this.product.img);
+            let infoBlock = this.createIBlock(product);
+
+            this.card.appendChild(photoBlock);
+            this.card.appendChild(infoBlock);
+        }
+
+        getCard() {
+            return this.card;
+        }
+
+        createPhotoBlock(productId, photoSrc) {
+            let photoBlock = createEl('div', 'product-card-img-edit');
+
+            let imgBlock = createEl('img', 'product-card-img');
+            imgBlock.src = photoSrc;
+            imgBlock.id = 'product-card-' + productId + '-img';
+
+            let fileInput = createEl('input');
+            fileInput.type = 'file';
+            fileInput.id = 'product-card-img-input-' + productId;
+
+
+            let button = createEl('button', 'product-card-img-edit-button btn btn-primary btn-sm', 'Загрузить фото');
+            button.id = 'product-card-' + productId + '-img-button';
+            button.dataset.productId = productId;
+            button.dataset.action = 'product-img-upload';
+
+            photoBlock.appendChild(imgBlock);
+            photoBlock.appendChild(fileInput);
+            photoBlock.appendChild(button);
+
+            return photoBlock;
+        }
+
+        createIBlock(product) {
+            let infoBlock = createEl('div', 'product-card-info');
+            infoBlock.appendChild(this.createInfoInput('Название', product.name, 'name-' + product.id));
+            infoBlock.appendChild(this.createInfoInput('Цена', product.price, 'price-' + product.id));
+            infoBlock.appendChild(this.createInfoInput('Количество', product.amount, 'amount-' + product.id));
+
+            let saveButton = createEl('button', 'product-card-img-edit-button btn btn-success btn-sm', 'Сохранить');
+            saveButton.id = `product-submit-${product.id}`;
+            saveButton.dataset.productId = product.id;
+            saveButton.addEventListener('click', this.saveProductAction.bind(this), false);
+
+            let deleteButton = createEl('button', 'product-card-img-edit-button btn btn-danger btn-sm product-card-buttons-delete', 'Удалить');
+            deleteButton.id = `product-delete-${product.id}`;
+            deleteButton.dataset.productId = product.id;
+            deleteButton.addEventListener('click', this.deleteProductAction.bind(this), false);
+
+            let buttonsBlock = createEl('div', "product-card-buttons-block");
+            buttonsBlock.appendChild(saveButton);
+            buttonsBlock.appendChild(deleteButton);
+
+
+            infoBlock.appendChild(buttonsBlock);
+
+            this.errorBlock = createEl('p', 'text-danger');
+            this.errorBlock.style.marginTop = '10px';
+            this.errorBlock.style.display = 'none';
+            infoBlock.appendChild(this.errorBlock);
+
+            this.successBlock = createEl('p', 'text-success');
+            this.successBlock.style.marginTop = '10px';
+            this.successBlock.style.display = 'none';
+            infoBlock.appendChild(this.successBlock);
+
+            return infoBlock;
+        }
+
+        showError(msg) {
+            this.errorBlock.innerHTML = msg;
+            this.successBlock.style.display = 'none';
+            this.errorBlock.style.display = 'block';
+
+        }
+
+        showSuccess(msg) {
+            this.successBlock.innerHTML = msg;
+            this.errorBlock.style.display = 'none';
+            this.successBlock.style.display = 'block';
+        }
+
+        deleteProductAction(event) {
+            if (parseInt(this.product.id) === parseInt(event.path[0].dataset.productId))
+            {
+                this.deleteProduct();
+            }
+        }
+
+        deleteProduct() {
+
+            let productData = this.product;
+
+            fetch('/admin/product', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData),
+            }).then(response => response.json()).then(data => {
+                if (data.code === 'OK') {
+                    location.reload();
+                }
+                else {
+                    this.showError(data.errorDescription);
+                }
+            })
+        }
+
+        saveProductAction(event) {
+            let productId = event.path[0].dataset.productId;
+            let productData = this.collectProduct(productId);
+
+            fetch('/admin/product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData),
+            }).then(response => response.json()).then(data => {
+                if (data.code === 'OK') {
+                    this.showSuccess("Товар успешно сохранен!");
+                }
+                else {
+                    this.showError(data.errorDescription);
+                }
+            })
+        }
+
+        collectProduct(productId) {
+            return {
+                name: this.card.querySelector(`#product-card-info-name-${productId}`).value,
+                price: this.card.querySelector(`#product-card-info-price-${productId}`).value,
+                amount: this.card.querySelector(`#product-card-info-amount-${productId}`).value,
+                id: productId,
+                img: this.product.img
+            }
+        }
+
+        createInfoInput(name, value, inputId) {
+            let input = createEl('div', 'input-group input-group-sm mb-3');
+
+            let inputTitle = createEl('div', 'input-group-prepend', `<span class="input-group-text" id="">${name}</span>`);
+
+            let inputField = createEl('input', 'form-control');
+            inputField.type = 'text';
+            inputField.value = value;
+            inputField.id = 'product-card-info-' + inputId;
+
+            input.appendChild(inputTitle);
+            input.appendChild(inputField);
+            return input;
+        }
+    }
+
+
+    /* --- APPLICATION BLOCK --- */
+
+    class AdminSPA
+    {
+        orders;
+        users;
+        products;
+
+        contentBlock;
+
+        constructor() {
+            this.orders = new Orders();
+            this.products = new Products();
+            this.users = new Users();
+
+            this.contentBlock = document.querySelector('#app');
+            this.contentBlock.appendChild(this.orders.getContent());
+            this.contentBlock.appendChild(this.products.getContent());
+            this.contentBlock.appendChild(this.users.getContent());
+            this.loadData();
+        }
+
+        async loadData() {
+            fetch('/products').then(response => response.json()).then(data => {
+                if (data.product_list !== undefined) {
+                    data.product_list.forEach(product => {
+                        this.products.addProduct({
+                            id: product.id,
+                            img: product.image,
+                            name: product.name,
+                            price: product.price,
+                            amount: product.amount
+                        });
+                    });
+                }
+            }).then(await fetch('/admin/orders').then(response => response.json()).then(data => {
+                this.extractOrders(data.order_list);
+            }));
+        }
+
+        extractOrders(orders) {
+            orders.forEach(order => {
+                this.orders.addOrder(order);
+            })
+        }
+
+        openUsers() {
+            this.orders.hide();
+            this.products.hide();
+            this.users.showContent();
+        }
+
+        openOrder() {
+            this.products.hide();
+            this.users.hide();
+            this.orders.showContent();
+        }
+
+        openProducts() {
+            this.users.hide();
+            this.orders.hide();
+            this.products.showContent();
+        }
+    }
+
+
+    let app = new AdminSPA();
+    app.openProducts();
+</script>
+</body>
+</html>

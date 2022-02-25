@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="/css/catalog.css">
+</head>
+<body>
+<div class="popup" style="display: none" id="popup">
+
+    <div class="popup__menu">
+        <button class="popup__exit" id="popupExit">x</button>
+        <div class="ordermenu">
+            <div id="ordermenu-list" class="ordermenu__list">
+                <ul class="orderlist" id="orderList">
+                    <li class="orderlist__product">
+                        <img src="product-puc.jpeg" alt="" class="orderlist__product__img">
+                        <div class="orderlist__product__info">
+                            <p class="orderlist__product__info__title">Macbook pro</p>
+                            <p class="orderlist__product__info__counter">Всего: 3</p>
+                        </div>
+                    </li>
+                    <li class="orderlist__product">
+                        <img src="product-puc.jpeg" alt="" class="orderlist__product__img">
+                        <div class="orderlist__product__info">
+                            <p class="orderlist__product__info__title">Macbook pro</p>
+                            <p class="orderlist__product__info__counter">Всего: 3</p>
+                        </div>
+                    </li>
+                    <li class="orderlist__product">
+                        <img src="product-puc.jpeg" alt="" class="orderlist__product__img">
+                        <div class="orderlist__product__info">
+                            <p class="orderlist__product__info__title">Macbook pro</p>
+                            <p class="orderlist__product__info__counter">Всего: 3</p>
+                        </div>
+                    </li>
+                    <li class="orderlist__product">
+                        <img src="product-puc.jpeg" alt="" class="orderlist__product__img">
+                        <div class="orderlist__product__info">
+                            <p class="orderlist__product__info__title">Macbook pro</p>
+                            <p class="orderlist__product__info__counter">Всего: 3</p>
+                        </div>
+                    </li>
+                    <li class="orderlist__product">
+                        <img src="product-puc.jpeg" alt="" class="orderlist__product__img">
+                        <div class="orderlist__product__info">
+                            <p class="orderlist__product__info__title">Macbook pro</p>
+                            <p class="orderlist__product__info__counter">Всего: 3</p>
+                        </div>
+                    </li>
+                </ul>
+                <span class="ordermenu__summary" id="orderSummary">Всего: 231000 Руб.</span>
+            </div>
+            <div class="ordermenu__info" id="ordermenu-info">
+                <input type="text" id="order-name" class="orderinput" placeholder="ФИО">
+                <input type="text" id="order-email" class="orderinput" placeholder="E-Mail">
+                <input type="text" id="order-phone" class="orderinput" placeholder="Номер телефона">
+                <input type="text" id="order-address" class="orderinput" placeholder="Адрес доставки">
+                <button class="buy-button" id="order-apply" style="margin-top: 20px">Оформить заказ</button>
+                <div class="order-loader" id="order-loader">
+                    <img class="spinner spinner_mini" src="/spinner.svg"/>
+                </div>
+                <p class="error-message" id="order-error-message"></p>
+            </div>
+            <p class="thanks" id="thanks">Спасибо за заказ!</p>
+        </div>
+    </div>
+</div>
+<header>
+    <div class="header__list">
+        <h3 class="logo-text">Online Shop</h3>
+        <div class="basket" id="basket"><span class="basket-cnt basket-cnt-empty">1</span></div>
+    </div>
+</header>
+<div class="content" id="content">
+</div>
+<script>
+
+    function createEl(name, className, content = null) {
+        let el = document.createElement(name);
+        el.className = className;
+
+        if (content !== null)
+            el.innerText = content;
+
+        return el;
+    }
+
+    class Basket {
+        count;
+        basketBlock;
+        basketItems;
+
+        constructor() {
+            this.count = 0;
+            this.basketBlock = document.querySelector('#basket');
+            this.basketItems = [];
+        }
+
+        hideCount() {
+            this.basketBlock.childNodes[0].setAttribute('class', 'basket-cnt-empty');
+        }
+
+        showCount() {
+            this.basketBlock.childNodes[0].setAttribute('class', 'basket-cnt');
+        }
+
+        getBasket() {
+            return this.basketBlock;
+        }
+
+        getCount() {
+            return this.count;
+        }
+
+        addCount() {
+            this.count++;
+
+            if (this.count > 0)
+            {
+                if (this.count === 1)
+                {
+                    this.showCount();
+                }
+                this.basketBlock.childNodes[0].textContent = this.count;
+            }
+
+        }
+
+        minusCount() {
+            this.count--;
+            if (this.count <= 0) {
+                this.count = 0;
+                this.hideCount();
+            }
+            this.basketBlock.childNodes[0].textContent = this.count;
+        }
+
+        addProduct(id) {
+            this.minusCount();
+        }
+
+        deleteProduct(id) {
+            this.addCount();
+        }
+
+    }
+
+    class Product {
+
+        constructor(id, name, price, img) {
+            this.id = id;
+            this.name = name;
+            this.price = price;
+            this.img = img;
+        }
+    }
+
+    class CardBasket {
+        cardBlock;
+
+        addButton;
+        deleteButton;
+
+        counterBlock;
+
+        counter;
+        productId;
+
+        constructor(id, size = 0) {
+            this.counter = parseInt(size);
+            if (isNaN(this.counter))
+            {
+                this.counter = 0;
+            }
+
+            this.productId = id;
+
+            this.cardBlock = createEl('div', 'card-basket');
+
+            this.deleteButton = createEl('button', 'card-basket__btn', '-');
+            this.deleteButton.dataset.productId = id;
+            this.deleteButton.dataset.action = 'delete_product';
+
+            this.addButton = createEl('button', 'card-basket__btn', '+');
+            this.addButton.dataset.productId = id;
+            this.addButton.dataset.action = 'add_product';
+
+            this.counterBlock = createEl('span', 'card-basket__cnt', '0');
+
+            this.cardBlock.appendChild(this.deleteButton);
+            this.cardBlock.appendChild(this.counterBlock);
+            this.cardBlock.appendChild(this.addButton);
+        }
+
+
+        hide() {
+            this.cardBlock.style.display = 'none';
+        }
+
+        display() {
+            this.cardBlock.style.display = 'flex';
+        }
+
+        getBasket() {
+            return this.cardBlock;
+        }
+
+        setCounter(value) {
+            this.counterBlock.innerText = parseInt(value);
+            this.counter = parseInt(value);
+        }
+
+        counterAdd() {
+            this.setCounter(this.counter+1);
+        }
+
+        counterDelete() {
+            this.setCounter(this.counter-1);
+        }
+
+        getCounter() {
+            return this.counter;
+        }
+    }
+
+    class ProductCard {
+        productId;
+        productCardBlock;
+
+        productCounter;
+
+        basket;
+        buyButtonBlock;
+
+
+        constructor(product) {
+            this.productId = product.id;
+
+            this.productCardBlock = document.createElement('div');
+            this.productCardBlock.className = 'product-card';
+
+            this.productCardBlock = createEl('div', 'product-card');
+
+            this.buyButtonBlock = createEl('button', 'buy-button card-button', 'Купить');
+            this.buyButtonBlock.dataset.productId = product.id;
+            this.buyButtonBlock.dataset.action = 'add_product';
+
+
+            this.basket = new CardBasket(this.productId);
+            this.basket.hide();
+
+            this.productCounter = 0;
+
+            let imgBlock = createEl('div', 'card-img');
+            let img = createEl('img', 'card-img__img');
+            img.src = product.img;
+            imgBlock.appendChild(img);
+            this.productCardBlock.appendChild(imgBlock);
+            this.productCardBlock.appendChild(createEl('span', 'card-name', product.name));
+            this.productCardBlock.appendChild(createEl('span', 'card-price', `${product.price} руб.`));
+            this.productCardBlock.appendChild(this.basket.getBasket());
+            this.productCardBlock.appendChild(this.buyButtonBlock);
+
+        }
+
+        addProduct() {
+            this.basket.counterAdd();
+            this.updateButton();
+        }
+
+        deleteProduct() {
+            if (this.basket.getCounter() > 0) {
+                this.basket.counterDelete();
+            }
+            this.updateButton();
+        }
+
+        updateButton() {
+            if (this.basket.getCounter() <= 0) {
+                this.productCounter = 0;
+                this.setEmpty();
+            }
+            else {
+                this.setSelect();
+            }
+        }
+
+        setEmpty() {
+            this.buyButtonBlock.style.display = 'block';
+            this.basket.hide();
+        }
+
+        setSelect() {
+            this.buyButtonBlock.style.display = 'none';
+            this.basket.display();
+        }
+
+        getProductCard() {
+            return this.productCardBlock;
+        }
+
+        getProductId() {
+            return this.productId;
+        }
+
+        getBasketCounter() {
+            return this.basket.getCounter();
+        }
+    }
+
+    class ProductList {
+        productList;
+
+        productCards = [];
+
+        constructor() {
+            this.productList = document.createElement('div');
+            this.productList.className = 'product-list';
+
+            this.productList.addEventListener('click', this.productManageHandler.bind(this), false);
+        }
+
+        productManageHandler(buttonData) {
+            let data = buttonData.path[0].dataset;
+            if (data.action !== undefined)
+            {
+                this.makeAction(data.action, data);
+            }
+        }
+
+        makeAction(action, params) {
+            switch (action) {
+                case 'add_product':
+                    this.plusProduct(parseInt(params.productId));
+                    break;
+                case 'delete_product':
+                    this.minusProduct(parseInt(params.productId));
+                    break;
+            }
+        }
+
+        plusProduct(productId) {
+            this.productCards[productId].addProduct();
+            let count = this.productCards[productId].getBasketCounter();
+            app.setCount(productId, count);
+        }
+
+        minusProduct(productId) {
+            this.productCards[productId].deleteProduct();
+            let count = this.productCards[productId].getBasketCounter();
+            app.setCount(productId, count);
+        }
+
+        getProductList() {
+            return this.productList;
+        }
+
+        addProduct(productCard) {
+            if (!this.productCards[productCard.getProductId()])
+            {
+                this.productList.appendChild(productCard.getProductCard());
+            }
+            this.productCards[productCard.getProductId()] = productCard;
+        }
+
+        hideProductList() {
+            this.productList.style.display = 'none';
+        }
+
+        showProductList() {
+            this.productList.style.display = 'flex';
+        }
+    }
+
+    class Order {
+        popup;
+        popupExit;
+        productList;
+        orderSummary;
+
+        orderFormApply;
+
+        orderProductList;
+
+        spinner;
+
+        loadBg = "rgb(182 184 187)";
+        activeBg = "rgb(0, 113, 227)";
+
+
+
+        constructor() {
+            this.popup = document.querySelector('#popup');
+
+            this.popupExit = document.querySelector('#popupExit');
+            this.popupExit.addEventListener('click', this.hideOrder.bind(this), false);
+            this.productList = document.querySelector('#orderList');
+            this.orderSummary = document.querySelector('#orderSummary');
+
+            this.spinner = document.querySelector('#order-loader');
+
+            this.orderFormApply = document.querySelector('#order-apply');
+            this.orderFormApply.addEventListener('click', this.applyForm.bind(this), false);
+        }
+
+
+        getUserData() {
+            return {
+                name: document.querySelector('#order-name').value,
+                email: document.querySelector('#order-email').value,
+                phone: document.querySelector('#order-phone').value,
+                address: document.querySelector('#order-address').value,
+            };
+        }
+
+        enableLoader() {
+            this.orderFormApply.disabled = true;
+            this.orderFormApply.style.backgroundColor = "rgb(182 184 187)";
+            this.spinner.style.display = 'block';
+        }
+
+        showError(message) {
+            document.querySelector('#order-error-message').innerHTML = message;
+            document.querySelector('#order-error-message').style.display = 'block';
+        }
+
+        hideError() {
+            document.querySelector('#order-error-message').style.display = 'none';
+        }
+
+        applyForm() {
+            this.hideError();
+            document.querySelector('#order-name').style.backgroundColor = '#ffffff';
+            document.querySelector('#order-email').style.backgroundColor = '#ffffff';
+            document.querySelector('#order-phone').style.backgroundColor = '#ffffff';
+            document.querySelector('#order-address').style.backgroundColor = '#ffffff';
+            let userData = this.getUserData();
+
+            debugger;
+            let empty = 0;
+            if (userData.name === '') {
+                empty++;
+                document.querySelector('#order-name').style.backgroundColor = 'rgb(255,119,119)';
+            }
+            if (userData.email === '') {
+                empty++;
+                document.querySelector('#order-email').style.backgroundColor = 'rgb(255,119,119)';
+            }
+            if (userData.phone === '') {
+                empty++;
+                document.querySelector('#order-phone').style.backgroundColor = 'rgb(255,119,119)';
+            }
+            if (userData.address === '') {
+                empty++;
+                document.querySelector('#order-address').style.backgroundColor = 'rgb(255,119,119)';
+            }
+
+            if (empty > 0)
+            {
+                this.showError("Для оформления заказа нужно заполнить все поля!")
+                return;
+            }
+
+            this.enableLoader();
+            console.log('form data: ', userData, this.orderProductList);
+            let orderAddress = userData.address;
+            userData.address = undefined;
+            let requestData = {
+                user: userData,
+                address: orderAddress,
+                products: this.formProductList(),
+            }
+
+            fetch('/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            }).then(response => response.json()).then(data => {
+                this.showSuccess();
+            })
+        }
+
+        formProductList() {
+            let positionList = [];
+            this.orderProductList.forEach(product => {
+                positionList.push({id: product.id, count: product.count});
+            });
+            return positionList;
+        }
+
+        createOrderPosition(name, count, img) {
+            let positionBlock = createEl('li', 'orderlist__product');
+
+            let photo = createEl('img', 'orderlist__product__img');
+            photo.src = img;
+
+            let infoBlock = createEl('div', 'orderlist__product__info');
+            infoBlock.appendChild(createEl('p', 'orderlist__product__info__title', name));
+            infoBlock.appendChild(createEl('p', 'orderlist__product__info__counter', ('Всего: ' + count)));
+
+            positionBlock.appendChild(photo);
+            positionBlock.appendChild(infoBlock);
+            return positionBlock;
+        }
+
+        hideOrder() {
+            this.popup.style.display = 'none';
+        }
+
+        showOrder() {
+            this.popup.style.display = 'block';
+        }
+
+        startOrder(products = []) {
+            //debugger;
+            this.orderProductList = products;
+            this.productList.innerHTML = '';
+            let summary = 0;
+            products.forEach(product => {
+                this.productList.appendChild(this.createOrderPosition(product.name, product.count, product.img));
+                summary += product.count * product.price;
+            });
+
+            this.orderSummary.innerHTML = "Всего: " + summary + " руб.";
+            this.showOrder();
+        }
+
+        showSuccess() {
+            /* это мегажесткий костыль, но я тороплюсь... */
+            document.querySelector('#ordermenu-info').innerHTML = '';
+            document.querySelector('#ordermenu-info').style.width = '0';
+            document.querySelector('#ordermenu-info').style.padding = '0';
+            document.querySelector('#ordermenu-list').innerHTML = '';
+            document.querySelector('#ordermenu-list').style.width = '0';
+            document.querySelector('#ordermenu-list').style.padding = '0';
+            document.querySelector('#thanks').style.display = 'block';
+            setTimeout(() => location.reload(), 2000);
+        }
+    }
+
+    class App {
+        productList;
+        basket;
+        order;
+
+        loader;
+
+        allProducts;
+
+        constructor() {
+            this.productList = new ProductList();
+            this.basket = new Basket();
+            this.basket.getBasket().addEventListener('click', this.openPopup.bind(this), false);
+            this.order = new Order();
+
+            let loaderSpinner = createEl('div', 'loader__spinner');
+            let spinner = createEl('img', 'spinner');
+            spinner.src = '/spinner.svg';
+            loaderSpinner.appendChild(spinner);
+            this.loader = createEl('div', 'loader');
+            this.loader.appendChild(loaderSpinner);
+
+            this.allProducts = [];
+
+            this.productList.hideProductList();
+
+            document.querySelector('#content').appendChild(this.productList.getProductList());
+            document.querySelector('#content').appendChild(this.loader);
+        }
+
+
+        setCount(productId, count) {
+            if (this.allProducts[productId].count == count)
+            {
+                return;
+            }
+            else if (this.allProducts[productId].count === 0 && count > 0)
+            {
+                this.allProducts[productId].count = count;
+                this.basket.addCount();
+            }
+            else if (this.allProducts[productId].count > 0 && count == 0)
+            {
+                this.allProducts[productId].count = 0;
+                this.basket.minusCount();
+            }
+            else
+            {
+                this.allProducts[productId].count = count;
+            }
+        }
+
+        addProduct(productObject) {
+            this.allProducts[productObject.id] = {
+                id: productObject.id,
+                name: productObject.name,
+                img: productObject.img,
+                price: productObject.price,
+                count: 0
+            };
+
+            this.productList.addProduct(new ProductCard(this.allProducts[productObject.id]));
+        }
+
+        openPopup() {
+            if (this.basket.count > 0)
+            {
+                this.order.startOrder(this.allProducts.filter(product => product.count > 0));
+            }
+        }
+
+        showLoader() {
+            this.loader.style.display = 'block';
+        }
+
+        hideLoader() {
+            this.loader.style.display = 'none';
+        }
+
+        hideProducts() {
+            this.showLoader();
+            this.productList.hideProductList();
+        }
+
+        showProducts() {
+            this.hideLoader();
+            this.productList.showProductList();
+        }
+
+        loadProducts() {
+            fetch('/products').then(response => response.json()).then(data => {
+                if (data.product_list !== undefined) {
+                    data.product_list.forEach(product => {
+                        this.addProduct({
+                            id: product.id,
+                            img: product.image,
+                            name: product.name,
+                            price: product.price
+                        });
+                    });
+                }
+            }).then(() => {
+                this.showProducts();
+            });
+        }
+    }
+
+    let app = new App();
+    app.loadProducts();
+
+</script>
+</body>
+</html>

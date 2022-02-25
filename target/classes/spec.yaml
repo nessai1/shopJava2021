@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Title
+  description: Title
+  version: 1.0.0
+servers:
+  - url: 'http'
+paths:
+  /product:
+    get:
+      description: Return data about product
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/products'
+  /setproduct:
+    post:
+      summary: Set new prodct
+      requestBody:
+        description: Product data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/product'
+      responses:
+        '201':
+          description: Created
+
+
+components:
+  schemas:
+    products:
+      additionalProperties: false
+      type: object
+      properties:
+        product_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/product'
+
+    product:
+      type: object
+      description: Info about product
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          description: Name of the product
+        price:
+          type: number
+          description: Price of the product
+        image:
+          type: string
+          description: Url of the product picture
+        weight:
+          type: string
+          description: Weight of the product
+
+
+
